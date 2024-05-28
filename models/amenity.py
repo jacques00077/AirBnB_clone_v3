@@ -1,22 +1,20 @@
 #!/usr/bin/python3
-""" State Module for HBNB project """
+"""
+Amenity Class from Models Module
+"""
+import os
 from models.base_model import BaseModel, Base
-# SQLAlchemy modules
-from sqlalchemy import Column, String, ForeignKey, Integer, Float
+from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy.orm import backref
+storage_type = os.environ.get('HBNB_TYPE_STORAGE')
 
 
 class Amenity(BaseModel, Base):
-    """Defines a class Amenity
-
-    Attributes:
-        __tablename__ (str): amenities
-
-        name (str): name of amenity.
-    """
-
-    __tablename__ = 'amenities'
-    name = Column(String(128), nullable=False)
-
-    def __init__(self, *args, **kwargs):
-        """initializes state"""
-        super().__init__(*args, **kwargs)
+    """Amenity class handles all application amenities"""
+    if storage_type == "db":
+        __tablename__ = 'amenities'
+        name = Column(String(128), nullable=False)
+        place_amenities = relationship("Place", secondary="place_amenity")
+    else:
+        name = ''

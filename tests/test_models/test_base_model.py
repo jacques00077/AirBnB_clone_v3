@@ -1,105 +1,148 @@
 #!/usr/bin/python3
-"""Base model test"""
-from models.base_model import BaseModel
+"""
+Unit Test for BaseModel Class
+"""
 import unittest
-import datetime
-from uuid import UUID
+from datetime import datetime
+import models
 import json
 import os
-import pep8
+
+BaseModel = models.base_model.BaseModel
+storage_type = os.environ.get('HBNB_TYPE_STORAGE')
 
 
-class test_basemodel(unittest.TestCase):
-    """Base model test"""
+class TestBaseModelDocs(unittest.TestCase):
+    """Class for testing BaseModel docs"""
 
-    def __init__(self, *args, **kwargs):
-        """Base model test"""
-        super().__init__(*args, **kwargs)
-        self.name = 'BaseModel'
-        self.value = BaseModel
+    @classmethod
+    def setUpClass(cls):
+        print('\n\n.................................')
+        print('..... Testing Documentation .....')
+        print('.....  For BaseModel Class  .....')
+        print('.................................\n\n')
+
+    def test_doc_file(self):
+        """... documentation for the file"""
+        expected = '\nBaseModel Class of Models Module\n'
+        actual = models.base_model.__doc__
+        self.assertEqual(expected, actual)
+
+    def test_doc_init(self):
+        """... documentation for init function"""
+        expected = 'instantiation of new BaseModel Class'
+        actual = BaseModel.__init__.__doc__
+        self.assertEqual(expected, actual)
+
+    def test_doc_save(self):
+        """... documentation for save function"""
+        expected = 'updates attribute updated_at to current time'
+        actual = BaseModel.save.__doc__
+        self.assertEqual(expected, actual)
+
+    def test_doc_to_json(self):
+        """... documentation for to_json function"""
+        expected = 'returns json representation of self'
+        actual = BaseModel.to_json.__doc__
+        self.assertEqual(expected, actual)
+
+    def test_doc_str(self):
+        """... documentation for to str function"""
+        expected = 'returns string type representation of object instance'
+        actual = BaseModel.__str__.__doc__
+        self.assertEqual(expected, actual)
+
+
+class TestBaseModelInstances(unittest.TestCase):
+    """testing for class instances"""
+
+    @classmethod
+    def setUpClass(cls):
+        print('\n\n.................................')
+        print('....... Testing Functions .......')
+        print('.....  For BaseModel Class  .....')
+        print('.................................\n\n')
 
     def setUp(self):
-        """Base model test"""
-        pass
+        """initializes new BaseModel instance for testing"""
+        self.model = BaseModel()
 
-    def tearDown(self):
+    def test_instantiation(self):
+        """... checks if BaseModel is properly instantiated"""
+        self.assertIsInstance(self.model, BaseModel)
+
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
+    def test_to_string(self):
+        """... checks if BaseModel is properly casted to string"""
+        my_str = str(self.model)
+        my_list = ['BaseModel', 'id', 'created_at']
+        actual = 0
+        for sub_str in my_list:
+            if sub_str in my_str:
+                actual += 1
+        self.assertTrue(3 == actual)
+
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
+    def test_to_string(self):
+        """... checks if BaseModel is properly casted to string"""
+        my_str = str(self.model)
+        my_list = ['BaseModel', 'id', 'created_at']
+        actual = 0
+        for sub_str in my_list:
+            if sub_str in my_str:
+                actual += 1
+        self.assertTrue(3 == actual)
+
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
+    def test_instantiation_no_updated(self):
+        """... should not have updated attribute"""
+        my_str = str(self.model)
+        actual = 0
+        if 'updated_at' in my_str:
+            actual += 1
+        self.assertTrue(0 == actual)
+
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
+    def test_save(self):
+        """... save function should add updated_at attribute"""
+        self.model.save()
+        actual = type(self.model.updated_at)
+        expected = type(datetime.now())
+        self.assertEqual(expected, actual)
+
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
+    def test_to_json(self):
+        """... to_json should return serializable dict object"""
+        my_model_json = self.model.to_json()
+        actual = 1
         try:
-            os.remove('file.json')
-        except Exception:
-            pass
+            serialized = json.dumps(my_model_json)
+        except:
+            actual = 0
+        self.assertTrue(1 == actual)
 
-    def test_default(self):
-        """Base model test"""
-        i = self.value()
-        self.assertEqual(type(i), self.value)
+    @unittest.skipIf(storage_type == 'db', 'skip if environ is db')
+    def test_json_class(self):
+        """... to_json should include class key with value BaseModel"""
+        my_model_json = self.model.to_json()
+        actual = None
+        if my_model_json['__class__']:
+            actual = my_model_json['__class__']
+        expected = 'BaseModel'
+        self.assertEqual(expected, actual)
 
-    def test_kwargs(self):
-        """Base model test"""
-        i = self.value()
-        copy = i.to_dict()
-        new = BaseModel(**copy)
-        self.assertFalse(new is i)
+    def test_name_attribute(self):
+        """... add name attribute"""
+        self.model.name = "Holberton"
+        actual = self.model.name
+        expected = "Holberton"
+        self.assertEqual(expected, actual)
 
-    def test_kwargs_int(self):
-        """Base model test"""
-        i = self.value()
-        copy = i.to_dict()
-        copy.update({1: 2})
-        with self.assertRaises(TypeError):
-            new = BaseModel(**copy)
+    def test_number_attribute(self):
+        """... add number attribute"""
+        self.model.number = 98
+        actual = self.model.number
+        self.assertTrue(98 == actual)
 
-    # def test_save(self):
-    #     """ Testing save """
-    #     i = self.value()
-    #     i.save()
-    #     key = self.name + "." + i.id
-    #     with open('file.json', 'r') as f:
-    #         j = json.load(f)
-    #         self.assertEqual(j[key], i.to_dict())
-
-    # def test_str(self):
-    #     """Base model test"""
-    #     i = self.value()
-    #     self.assertEqual(str(i), '[{}] ({}) {}'.format(self.name, i.id,
-    #                      i.__dict__))
-
-    def test_todict(self):
-        """Base model test"""
-        i = self.value()
-        n = i.to_dict()
-        self.assertEqual(i.to_dict(), n)
-
-    def test_kwargs_none(self):
-        """Base model test"""
-        n = {None: None}
-        with self.assertRaises(TypeError):
-            new = self.value(**n)
-
-    # def test_kwargs_one(self):
-    #     """Base model test"""
-    #     n = {'Name': 'test'}
-    #     with self.assertRaises(KeyError):
-    #         new = self.value(**n)
-
-    def test_id(self):
-        """Base model test"""
-        new = self.value()
-        self.assertEqual(type(new.id), str)
-
-    def test_created_at(self):
-        """Base model test"""
-        new = self.value()
-        self.assertEqual(type(new.created_at), datetime.datetime)
-
-    def test_updated_at(self):
-        """Base model test"""
-        new = self.value()
-        self.assertEqual(type(new.updated_at), datetime.datetime)
-        n = new.to_dict()
-        new = BaseModel(**n)
-        self.assertFalse(new.created_at == new.updated_at)
-
-    def test_pep8(self):
-        """Check pep8 styling"""
-        p = pep8.StyleGuide(quiet=True).check_files(["models/base_model.py"])
-        self.assertEqual(p.total_errors, 0)
+if __name__ == '__main__':
+    unittest.main

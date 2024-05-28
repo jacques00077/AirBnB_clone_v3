@@ -1,37 +1,51 @@
 #!/usr/bin/python3
-"""This module defines a class User"""
+"""
+User Class from Models Module
+"""
+import os
 from models.base_model import BaseModel, Base
-
-# SQLAlchemy modules
-from sqlalchemy import Column
-from sqlalchemy import String
 from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, Float
+from hashlib import md5
+storage_type = os.environ.get('HBNB_TYPE_STORAGE')
 
 
 class User(BaseModel, Base):
-    """
-    Defines a class User
+    """User class handles all application users"""
+    if storage_type == "db":
+        __tablename__ = 'users'
+        email = Column(String(128), nullable=False)
+        password = Column("password", String(128), nullable=False)
+        first_name = Column(String(128), nullable=True)
+        last_name = Column(String(128), nullable=True)
 
-    Attributes:
-        __tablename__ (str): Users MySQL table name
+        places = relationship('Place', backref='user', cascade='delete')
+        reviews = relationship('Review', backref='user', cascade='delete')
+    else:
+        email = ''
+        password = ''
+        first_name = ''
+        last_name = ''
 
-        email (String): User's email address column
-        password (String): User's password column
-        first_name (String): User's first name column
-        last_name (String): User's last name column
-    """
-    __tablename__ = 'users'
+    def __init__(self, *args, **kwargs):
+        """
+        initialize User Model, inherits from BaseModel
+        """
+        super().__init__(*args, **kwargs)
 
-    email = Column(String(128), nullable=False)
-    password = Column(String(128), nullable=False)
-    first_name = Column(String(128))
-    last_name = Column(String(128))
+    @property
+    def password(self):
+        """
+        getter for password
+        :return: password (hashed)
+        """
+        return self.__dict__.get("password")
 
-    places = relationship('Place',
-                          backref='user',
-                          cascade='all, delete-orphan',
-                          passive_deletes=True)
-    reviews = relationship('Review',
-                           backref='user',
-                           cascade='all, delete-orphan',
-                           passive_deletes=True)
+    @password.setter
+    def password(self, password):
+        """
+        Password setter, with md5 hasing
+        :param password: password
+        :return: nothing
+        """
+        self.__dict__["password"] = md5(password.encode('utf-8')).hexdigest()
